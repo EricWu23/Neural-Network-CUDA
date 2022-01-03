@@ -11,12 +11,12 @@ void sequential_forward_gpu(float *inp, std::vector<Module*> layers, float *out)
 
         sz_out = layer->sz_out;
 
-        cudaMallocManaged(&curr_out, sz_out*sizeof(float));
-        layer->forward(inp, curr_out);
+        cudaMallocManaged(&curr_out, sz_out*sizeof(float));//temporary mem for storing the current layer's forward outpt.
+        layer->forward(inp, curr_out);//linear.forward does not modify inp, it only stores inp inside linear.inp. Similarly, curr_out is stored in linear.out
 
-        inp = curr_out;
+        inp = curr_out;// the output of current layer (curr_out) is the input of next layer. Question: does modify inp changes the pointer beinng orignally pass in this function? No. It is just a copied pointer of the pointer that was passed in as argument.
     }
-
+    // kill the curr_out pointer
     cudaMallocManaged(&curr_out, sizeof(float));
     cudaFree(curr_out);
 }

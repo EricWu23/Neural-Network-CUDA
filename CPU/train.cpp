@@ -4,7 +4,20 @@
 #include "train.h"
 #include "../utils/utils.h"
 
+/*
+    Description:
+        train the neural network defined by seq using input data defined by inp, bs, n_in, and target label defined by targ. It trains on the same 
+        data n_epochs times
+    Params:
+        Sequential_CPU seq ------ sequential model defines the neural network
+        float *inp         ------ pointer to the array that contains all the inputs (bsxn_in) in size
+        float *targ        ------ pointer to the array taht contains all the labels 
+        int bs             ------ batch size
+        int n_in           ------ number of inputs of the neural network
+        int n_epochs       ------ number of times that we train by looping through the same data             
 
+
+*/
 void train_cpu(Sequential_CPU seq, float *inp, float *targ, int bs, int n_in, int n_epochs){
     MSE_CPU mse(bs);
     
