@@ -22,7 +22,7 @@ int main(){
     end = std::chrono::steady_clock::now();
     std::cout << "Data reading time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end-begin).count())/1000000.0f << std::endl;
     
-    int bs=10000;
+    int bs=100000;
     Linear_GPU* lin1 = new Linear_GPU(bs, n_in, n_hidden);
     ReLU_GPU* relu1 = new ReLU_GPU(bs*n_hidden);
     Linear_GPU* lin2 = new Linear_GPU(bs, n_hidden, 1);
