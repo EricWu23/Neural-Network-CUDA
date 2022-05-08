@@ -1,6 +1,16 @@
 #include "linear.h"
 #include "../utils/utils.h"
+#include <iostream>
 
+inline void CUDAErrorCheck(cudaError_t err,const char * name){
+ 
+    if(err!= cudaSuccess)
+    {
+      std::cerr << "ERROR: " <<  name << " (" << err << ")" << std::endl;
+      printf("CUDA Error: %s\n", cudaGetErrorString(err));
+      exit(-1);
+    }
+}
 
 __global__
 void linear_forward_gpu(float *inp, float *weights, float *bias, float *out, int bs, int n_in, int n_out){
@@ -83,8 +93,16 @@ void Linear_GPU::forward(float *_inp, float *_out){
 
     dim3 n_blocks(n_block_rows, n_block_cols);
     dim3 n_threads(block_size, block_size);
-
+    std::cout<<"n_block_rows: "<< n_block_rows<<std::endl;
+    std::cout<<"n_block_cols: "<< n_block_cols<<std::endl;
+    std::cout<<"block_size: "<< block_size<<std::endl;
+    std::cout<<"n_out: "<< n_out<<std::endl;
+    std::cout<<"n_in: "<< n_in<<std::endl;
+    std::cout<<"bs: "<< bs<<std::endl;
     linear_forward_gpu<<<n_blocks, n_threads>>>(inp, weights, bias, out, bs, n_in, n_out);
+
+    cudaError_t err = cudaGetLastError();
+    CUDAErrorCheck(err,"linear_forward_gpu launch failed");
     cudaDeviceSynchronize();
 }
 
@@ -94,8 +112,9 @@ void Linear_GPU::backward(){
 
     dim3 n_blocks(n_block_rows, n_block_cols);
     dim3 n_threads(block_size, block_size);
-
     linear_backward_gpu<<<n_blocks, n_threads>>>(inp, cp_weights, out, bs, n_in, n_out);
+    cudaError_t err = cudaGetLastError();
+    CUDAErrorCheck(err,"linear_backward_gpu launch failed");
     cudaDeviceSynchronize();
 
     cudaFree(cp_weights);
@@ -110,5 +129,7 @@ void Linear_GPU::update(){
     dim3 n_threads(block_size, block_size);
     
     linear_update_gpu<<<n_blocks, n_threads>>>(inp, weights, bias, out, bs, n_in, n_out, lr);
+    cudaError_t err = cudaGetLastError();
+    CUDAErrorCheck(err,"linear_update_gpu launch failed");
     cudaDeviceSynchronize();
 }

@@ -1,5 +1,16 @@
 #include "mse.h"
 
+#include <iostream>
+
+inline void CUDAErrorCheck(cudaError_t err,const char * name){
+ 
+    if(err!= cudaSuccess)
+    {
+      std::cerr << "ERROR: " <<  name << " (" << err << ")" << std::endl;
+      printf("CUDA Error: %s\n", cudaGetErrorString(err));
+      exit(-1);
+    }
+}
 
 __global__
 void mse_forward_gpu(float *inp, float *out, int sz_out){
@@ -38,11 +49,15 @@ void MSE_GPU::_forward(float *_inp, float *_out){
     _out[sz_out] = 0.0f;
     
     mse_forward_gpu<<<n_blocks, block_size>>>(_inp, _out, sz_out);
+    cudaError_t err = cudaGetLastError();
+    CUDAErrorCheck(err,"mse_forward_gpu launch failed");
     cudaDeviceSynchronize();
 }
 
 
 void MSE_GPU::backward(){
     mse_backward_gpu<<<n_blocks, block_size>>>(inp, out, sz_out);
+    cudaError_t err = cudaGetLastError();
+    CUDAErrorCheck(err,"mse_backward_gpu launch failed");
     cudaDeviceSynchronize();
 }

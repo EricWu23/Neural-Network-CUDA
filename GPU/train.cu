@@ -15,6 +15,15 @@ void debug(float *arrayname,int n_sample,int sz_out){
     }
  }        
 }
+inline void CUDAErrorCheck(cudaError_t err,const char * name){
+ 
+    if(err!= cudaSuccess)
+    {
+      std::cerr << "ERROR: " <<  name << " (" << err << ")" << std::endl;
+      printf("CUDA Error: %s\n", cudaGetErrorString(err));
+      exit(-1);
+    }
+}
 
 void train_gpu(Sequential_GPU & seq, float *inp, float *targ, int bs, int n_in, int n_out, int n_epochs){
     int sz_out = bs*n_out;
@@ -22,7 +31,8 @@ void train_gpu(Sequential_GPU & seq, float *inp, float *targ, int bs, int n_in, 
     
     int sz_inp = bs*n_in;
     float *cp_inp, *out;
-    cudaMallocManaged(&cp_inp, sz_inp*sizeof(float));
+    cudaError_t err=cudaMallocManaged(&cp_inp, sz_inp*sizeof(float));
+    CUDAErrorCheck(err,"failed to allocate memory for input copy");
 
     for (int i=0; i<n_epochs; i++){
         set_eq(cp_inp, inp, sz_inp);// create a deep copy of the inp as cp_inp

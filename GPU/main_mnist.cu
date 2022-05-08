@@ -1,4 +1,5 @@
 #include <chrono>
+#include <iostream>
 
 #include "linear.h"
 #include "relu.h"
@@ -6,15 +7,40 @@
 #include "validate.h"
 #include "../data/read_csv.h"
 
-#define TOTAL_TRAINING_SAMPLE 100
-#define TRAIN_GBATCH_SIZE 10
+#define TOTAL_TRAINING_SAMPLE 800
+#define TRAIN_GBATCH_SIZE 100
 #define NUM_OF_INPUT 784
 #define NUM_OF_OUTPUT 10
 
 #define TOTAL_TESTING_SAMPLE 1000
 #define TEST_BATCH_SIZE 1000
 
+inline void CUDAErrorCheck(cudaError_t err,const char * name){
+ 
+    if(err!= cudaSuccess)
+    {
+      std::cerr << "ERROR: " <<  name << " (" << err << ")" << std::endl;
+      printf("CUDA Error: %s\n", cudaGetErrorString(err));
+      exit(-1);
+    }
+}
+
 int main(){
+
+  int nDevices;
+  cudaGetDeviceCount(&nDevices);
+  for (int i = 0; i < nDevices; i++) {
+    cudaDeviceProp prop;
+    cudaGetDeviceProperties(&prop, i);
+    printf("Device Number: %d\n", i);
+    printf("  Device name: %s\n", prop.name);
+    printf("  Memory Clock Rate (KHz): %d\n",
+           prop.memoryClockRate);
+    printf("  Memory Bus Width (bits): %d\n",
+           prop.memoryBusWidth);
+    printf("  Peak Memory Bandwidth (GB/s): %f\n\n",
+           2.0*prop.memoryClockRate*(prop.memoryBusWidth/8)/1.0e6);
+  }
     std::chrono::steady_clock::time_point begin, end;
 
     int tbs = TOTAL_TRAINING_SAMPLE, n_in = NUM_OF_INPUT, n_epochs = 10;
@@ -23,8 +49,10 @@ int main(){
     int n_out = NUM_OF_OUTPUT;
 
     float *inp, *targ;  
-    cudaMallocManaged(&inp, tbs*n_in*sizeof(float));
-    cudaMallocManaged(&targ, (TOTAL_TRAINING_SAMPLE*n_out+1)*sizeof(float));
+    cudaError_t err=cudaMallocManaged(&inp, tbs*n_in*sizeof(float));
+    CUDAErrorCheck(err,"failed to allocate memory for input data");
+    err=cudaMallocManaged(&targ, (TOTAL_TRAINING_SAMPLE*n_out+1)*sizeof(float));
+    CUDAErrorCheck(err,"failed to allocate memory for target data");
 
     // reading training data
     begin = std::chrono::steady_clock::now();
@@ -79,5 +107,8 @@ int main(){
     end = std::chrono::steady_clock::now();
     std::cout << "Validation time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end-begin).count())/1000000.0f << std::endl;
 */
+    cudaFree(inp);
+    cudaFree(targ);
+    cudaDeviceReset();
     return 0;
 }
