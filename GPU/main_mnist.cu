@@ -6,8 +6,8 @@
 #include "validate.h"
 #include "../data/read_csv.h"
 
-#define TOTAL_TRAINING_SAMPLE 10000
-#define TRAIN_GBATCH_SIZE 1
+#define TOTAL_TRAINING_SAMPLE 100
+#define TRAIN_GBATCH_SIZE 10
 #define NUM_OF_INPUT 784
 #define NUM_OF_OUTPUT 10
 
@@ -17,8 +17,8 @@
 int main(){
     std::chrono::steady_clock::time_point begin, end;
 
-    int tbs = TOTAL_TRAINING_SAMPLE, n_in = NUM_OF_INPUT, n_epochs = 1;
-    int n_hidden_1 = 512 ;
+    int tbs = TOTAL_TRAINING_SAMPLE, n_in = NUM_OF_INPUT, n_epochs = 10;
+    int n_hidden_1 = 512;
     int n_hidden_2 = 512;
     int n_out = NUM_OF_OUTPUT;
 
@@ -34,6 +34,7 @@ int main(){
     std::cout << "Data (Training) reading time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end-begin).count())/1000000.0f << std::endl;
     
     int bs=TRAIN_GBATCH_SIZE;
+    int num_bs=tbs/bs;
     Linear_GPU* lin1 = new Linear_GPU(bs, n_in, n_hidden_1);
     ReLU_GPU* relu1 = new ReLU_GPU(bs*n_hidden_1);
     //Linear_GPU* lin2 = new Linear_GPU(bs, n_hidden_1, n_hidden_2);
@@ -44,10 +45,15 @@ int main(){
     std::vector<Module*> layers = {lin1, relu1,lin3};
     Sequential_GPU seq(layers);
 
-    //Training:
+       //Training:
     begin = std::chrono::steady_clock::now();
-    train_gpu(seq,inp, targ, bs, n_in,n_out,n_epochs);
+    for(int i = 0;i<num_bs;i++){
+                                 
+     train_gpu(seq,inp+bs*i,targ+bs*i, bs, n_in,n_out,n_epochs);                      
+                                 
+     }
     end = std::chrono::steady_clock::now();
+                                     
     std::cout << "Training time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end-begin).count())/1000000.0f << std::endl;
 
 

@@ -31,14 +31,12 @@ void train_gpu(Sequential_GPU & seq, float *inp, float *targ, int bs, int n_in, 
         mse.forward(seq.layers.back()->out, targ);// dummy, store the argument passed in as mse.inp (y_hat), mse.out (targ, don't care)
         mse._forward(seq.layers.back()->out, targ);// compute the actual loss
 
-        /*
         std::cout<<"label:"<< 0<<": ";
         debug(targ,0,sz_out);// label
         std::cout<<"prediction:"<<0<<": ";
         debug(seq.layers.back()->out,0,sz_out);// estimation
-
         std::cout<<"sz_out:"<< mse.sz_out << std::endl;
-        */
+    
         std::cout<<"epoch:"<< i << " Training loss: " << targ[sz_out] << std::endl;
         
         mse.backward();//update the mse.inp to be dJ/dy_hat. mse.out still stores the targ and the last digit as don't care
@@ -53,4 +51,9 @@ void train_gpu(Sequential_GPU & seq, float *inp, float *targ, int bs, int n_in, 
     seq.forward(inp, out);
     mse._forward(seq.layers.back()->out, targ);// compute the actual loss
     std::cout << "The final Training loss is: " << targ[sz_out] << std::endl;
+    std::cout<<"label:"<< 0<<": ";
+    debug(targ,0,sz_out);// label
+    std::cout<<"prediction:"<<0<<": ";
+    debug(seq.layers.back()->out,0,sz_out);// estimation
+    
 }

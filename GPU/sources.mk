@@ -1,6 +1,6 @@
 # Add your Source files to this variable
 SOURCESLOCATION =linear.cu \
-      main.cu \
+      main_mnist.cu \
       mse.cu \
       relu.cu \
       sequential.cu \
@@ -10,7 +10,7 @@ SOURCESLOCATION =linear.cu \
       $(DATA)/read_csv.cpp
 # Add your Source files to this variable
 SOURCES = linear.cu \
-      main.cu \
+      main_mnist.cu \
       mse.cu \
       relu.cu \
       sequential.cu \
