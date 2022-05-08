@@ -40,9 +40,9 @@ void train_gpu(Sequential_GPU & seq, float *inp, float *targ, int bs, int n_in,i
     set_eq(cp_inp, inp_shift, sz_inp);// create a deep copy of the inp as cp_inp
 
     seq.forward(cp_inp, out);// after runing lin1.inp, lin1.out,relu1.inp,relu1.out,lin2.inp, and lin2.out will contain the results from forward propogation
-    mse.forward(seq.layers.back()->out, targ_shft);// dummy, store the argument passed in as mse.inp (y_hat), mse.out (targ, don't care)
+    mse.forward(seq.layers.back()->out, targ_shft);// dummy, store the argument passed in as mse.inp (y_hat), mse.out (targ_shft) 
 
-    mse.backward();//update the mse.inp to be dJ/dy_hat. mse.out still stores the targ and the last digit as don't care
+    mse.backward();//update the mse.inp to be dJ/dy_hat. mse.out stores the targ
     seq.update();
     /* clean up temporary memory at the end of each batch*/
     seq.free();
@@ -52,14 +52,7 @@ void train_gpu(Sequential_GPU & seq, float *inp, float *targ, int bs, int n_in,i
       mse._forward(seq.layers.back()->out, targ_shft);// compute the actual loss
       seq.free();
       std::cout << "Training Epoch:"<< epoch_idx << "| [finished size/traing size] : ["<< (batch_idx+1)*bs<<"/"<<tbs<< "] ("<<
-      (int)((batch_idx+1)*bs*100.0/tbs)<<"%) | Training Loss:"<< targ_shft[sz_out] << std::endl;
+      (int)((batch_idx+1)*bs*100.0/tbs)<<"%) | Training Loss:"<< mse.loss[0] << std::endl;
     }
     cudaFree(cp_inp);
-
-/* 
-    std::cout<<"label:"<< 0<<": ";
-    debug(targ,0,sz_out);// label
-    std::cout<<"prediction:"<<0<<": ";
-    debug(seq.layers.back()->out,0,sz_out);// estimation
-*/  
 }

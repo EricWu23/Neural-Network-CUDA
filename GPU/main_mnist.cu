@@ -9,10 +9,10 @@
 #include "../utils/utils.h"
 
 #define TOTAL_TRAINING_SAMPLE 60000
-#define TRAING_BATCH_SIZE 600
+#define TRAING_BATCH_SIZE 6000
 #define NUM_OF_INPUT 784
 #define NUM_OF_OUTPUT 10
-#define NUM_OF_EPOCH 3
+#define NUM_OF_EPOCH 10
 #define LOG_INTERVAL 20//print out training loss every LOG_INTERVAL number of batches
 
 #define TOTAL_TESTING_SAMPLE 10000
@@ -54,7 +54,7 @@ int main(){
     float *inp, *targ;  
     cudaError_t err=cudaMallocManaged(&inp, tbs*n_in*sizeof(float));
     CUDAErrorCheck(err,"failed to allocate memory for input data");
-    err=cudaMallocManaged(&targ, (TOTAL_TRAINING_SAMPLE*n_out+1)*sizeof(float));
+    err=cudaMallocManaged(&targ, (TOTAL_TRAINING_SAMPLE*n_out)*sizeof(float));
     CUDAErrorCheck(err,"failed to allocate memory for target data");
 
     /*------------------------- reading in training data------------------------*/

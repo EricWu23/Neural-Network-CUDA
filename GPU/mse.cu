@@ -13,11 +13,11 @@ inline void CUDAErrorCheck(cudaError_t err,const char * name){
 }
 
 __global__
-void mse_forward_gpu(float *inp, float *out, int sz_out){
+void mse_forward_gpu(float *inp, float *out, int sz_out,float* loss){
     int ind = blockDim.x*blockIdx.x + threadIdx.x;
 
     if (ind < sz_out){
-        atomicAdd(&out[sz_out], fdividef(powf(inp[ind]-out[ind], 2), sz_out));
+        atomicAdd(&loss[0], fdividef(powf(inp[ind]-out[ind], 2), sz_out));
     }
 }
 
@@ -35,7 +35,8 @@ void mse_backward_gpu(float *inp, float *out, int sz_out){
 MSE_GPU::MSE_GPU(int _sz_out){
     model_type = other;
     sz_out = _sz_out;
-    
+    cudaMallocManaged(&loss, sizeof(float));
+    loss[0]=0.0f;
     n_blocks = (sz_out + block_size - 1) / block_size;
 }
 
@@ -47,9 +48,9 @@ void MSE_GPU::forward(float *_inp, float *_out){
 
 
 void MSE_GPU::_forward(float *_inp, float *_out){
-    _out[sz_out] = 0.0f;
-    
-    mse_forward_gpu<<<n_blocks, block_size>>>(_inp, _out, sz_out);
+    //_out[sz_out] = 0.0f;
+    loss[0]=0.0;
+    mse_forward_gpu<<<n_blocks, block_size>>>(_inp, _out, sz_out,loss);
     cudaError_t err = cudaGetLastError();
     CUDAErrorCheck(err,"mse_forward_gpu launch failed");
     cudaDeviceSynchronize();

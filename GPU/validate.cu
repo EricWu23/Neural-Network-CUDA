@@ -23,6 +23,6 @@ void validate_gpu(Sequential_GPU & seq, float *inp, float *targ, int bs, int n_i
 
         The reason to implement max_element_index is to give us ability to count the correct prediction and compute the accuracy. 
     */
-    loss=loss+targ_shft[sz_out];
+    loss=loss+mse.loss[0];
 }
   
