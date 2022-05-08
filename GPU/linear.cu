@@ -69,6 +69,7 @@ void linear_update_gpu(float *inp, float *weights, float *bias, float *out, int 
 
 
 Linear_GPU::Linear_GPU(int _bs, int _n_in, int _n_out, float _lr){
+    model_type = linear;
     bs = _bs;
     n_in = _n_in;
     n_out = _n_out;
@@ -90,7 +91,7 @@ Linear_GPU::Linear_GPU(int _bs, int _n_in, int _n_out, float _lr){
 void Linear_GPU::forward(float *_inp, float *_out){
     inp = _inp;
     out = _out;
-
+    
     dim3 n_blocks(n_block_rows, n_block_cols);
     dim3 n_threads(block_size, block_size);
  /*   
@@ -134,4 +135,15 @@ void Linear_GPU::update(){
     cudaError_t err = cudaGetLastError();
     CUDAErrorCheck(err,"linear_update_gpu launch failed");
     cudaDeviceSynchronize();
+}
+
+void Linear_GPU::update_batchsize(int new_bs){
+  if(new_bs!=bs){
+    bs=new_bs;
+    sz_out = bs*n_out;
+    n_block_rows = (bs + block_size - 1) / block_size;
+    n_block_cols = (n_out + block_size - 1) / block_size;
+
+  }
+
 }

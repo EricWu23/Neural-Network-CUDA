@@ -91,3 +91,29 @@ int random_int(int min, int max){
     std::uniform_int_distribution<int> dist(min, max);
     return dist(gen);
 }
+
+void max_element_index(float* const &arr, const int &arrl,int * const &result){
+
+  try{
+      if(arrl<1){throw(arrl);}
+  }
+  catch(int leng){
+      std::cout << "the length of the array arr must be larger or equal to one\n";
+      std::cout << "arrl is: " << leng;
+      exit(-1);
+  }
+
+  int idx_max = 0;
+  int ele_max = arr[0];
+
+  if (arrl>=2){
+    for(int i=1; i<arrl;i++){
+        if(arr[i]>ele_max){
+            idx_max=i;
+            ele_max=arr[i];
+        }
+    }
+    
+  }
+  result[0] = idx_max;
+}

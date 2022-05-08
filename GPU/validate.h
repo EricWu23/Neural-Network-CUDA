@@ -13,9 +13,11 @@
             targ                 ----- pointer to the bsxn_out array, which stores labels for a batch in the flat array format
             bs                   ----- batch size
             n_in                 ----- number of input features into the Neural Network for per training sample
-            n_out                ----- number of output of the Neural Network
+            n_out                ----- number of output units of the Neural Network
+            batch_idx            ----- index for the test batch
+            loss                 ----- accumuated loss. The loss computed from each test batch will be added on top of the loss passed in.
+            correct              ----- accumulated correct number of estimation we made so far 
 */
-void validate_gpu(Sequential_GPU & seq, float *inp, float *targ, int bs, int n_in, int n_out);
-
+void validate_gpu(Sequential_GPU & seq, float *inp, float *targ, int bs, int n_in,int n_out,int batch_idx,float &loss,int &correct);
 
 #endif

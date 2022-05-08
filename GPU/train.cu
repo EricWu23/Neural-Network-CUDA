@@ -26,8 +26,8 @@ inline void CUDAErrorCheck(cudaError_t err,const char * name){
 }
 void train_gpu(Sequential_GPU & seq, float *inp, float *targ, int bs, int n_in,int n_out, int batch_idx,int epoch_idx,int log_interval,int tbs){
 
-    float* inp_shift=inp+batch_idx*bs;
-    float* targ_shft=targ+batch_idx*bs;
+    float* inp_shift=inp+batch_idx*bs*n_in;
+    float* targ_shft=targ+batch_idx*bs*n_out;
 
     int sz_out = bs*n_out;
     MSE_GPU mse(sz_out);
@@ -51,8 +51,8 @@ void train_gpu(Sequential_GPU & seq, float *inp, float *targ, int bs, int n_in,i
       seq.forward(cp_inp, out);
       mse._forward(seq.layers.back()->out, targ_shft);// compute the actual loss
       seq.free();
-      std::cout << "Training Epoch:"<< epoch_idx << "| [finished size/traing size] : ["<< batch_idx*bs<<"/"<<tbs<< "] ("<<
-      (int)(batch_idx*bs*100.0/tbs)<<"%) | Training Loss:"<< targ_shft[sz_out] << std::endl;
+      std::cout << "Training Epoch:"<< epoch_idx << "| [finished size/traing size] : ["<< (batch_idx+1)*bs<<"/"<<tbs<< "] ("<<
+      (int)((batch_idx+1)*bs*100.0/tbs)<<"%) | Training Loss:"<< targ_shft[sz_out] << std::endl;
     }
     cudaFree(cp_inp);
 

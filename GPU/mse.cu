@@ -33,6 +33,7 @@ void mse_backward_gpu(float *inp, float *out, int sz_out){
 
 
 MSE_GPU::MSE_GPU(int _sz_out){
+    model_type = other;
     sz_out = _sz_out;
     
     n_blocks = (sz_out + block_size - 1) / block_size;

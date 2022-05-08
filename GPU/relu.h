@@ -8,10 +8,13 @@
 class ReLU_GPU: public Module{
     public:
         int n_blocks;
-        
-        ReLU_GPU(int _sz_out);
+        int bs,n_in,n_out;
+        modeltype model_type;
+
+        ReLU_GPU(int _bs,int _n_in);
         void forward(float *_inp, float *_out);
         void backward();
+        void update_batchsize(int new_bs);
 };
 
 

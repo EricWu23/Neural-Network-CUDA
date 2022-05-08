@@ -15,6 +15,7 @@ class Sequential_GPU: public Module{
         void forward(float *inp, float *out);
         void update();
         void free();
+        void update_batchsize(int _bs);
 };
 
 

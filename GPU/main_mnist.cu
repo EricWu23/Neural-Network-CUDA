@@ -6,6 +6,7 @@
 #include "train.h"
 #include "validate.h"
 #include "../data/read_csv.h"
+#include "../utils/utils.h"
 
 #define TOTAL_TRAINING_SAMPLE 60000
 #define TRAING_BATCH_SIZE 600
@@ -14,8 +15,8 @@
 #define NUM_OF_EPOCH 3
 #define LOG_INTERVAL 20//print out training loss every LOG_INTERVAL number of batches
 
-#define TOTAL_TESTING_SAMPLE 1000
-#define TEST_BATCH_SIZE 1000
+#define TOTAL_TESTING_SAMPLE 10000
+#define TEST_BATCH_SIZE 100
 
 inline void CUDAErrorCheck(cudaError_t err,const char * name){
  
@@ -70,7 +71,7 @@ int main(){
     int num_bs=tbs/bs;
 
     Linear_GPU* lin1 = new Linear_GPU(bs, n_in, n_hidden_1);
-    ReLU_GPU* relu1 = new ReLU_GPU(bs*n_hidden_1);
+    ReLU_GPU* relu1 = new ReLU_GPU(bs,n_hidden_1);
     //Linear_GPU* lin2 = new Linear_GPU(bs, n_hidden_1, n_hidden_2);
     //ReLU_GPU* relu2 = new ReLU_GPU(bs*n_hidden_2);
     //Linear_GPU* lin3 = new Linear_GPU(bs, n_hidden_2, n_out);
@@ -86,20 +87,20 @@ int main(){
                                  
       for(int batch_idx=0;batch_idx<num_bs;batch_idx++){
           train_gpu(seq,inp,targ,bs,n_in,n_out,batch_idx,epoch_idx,log_interval,tbs); 
-        }                                                
+        }
+
      }
     end = std::chrono::steady_clock::now();
                                      
     std::cout << "Training time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end-begin).count())/1000000.0f << std::endl;
 
 
- /*
 
-    //Testing:
+    /*----------------------Testing-------------------------*/ 
     int tbs_test = TOTAL_TESTING_SAMPLE;
     float *inp_test, *targ_test;  
     cudaMallocManaged(&inp_test, tbs_test*n_in*sizeof(float));
-    cudaMallocManaged(&targ_test, (tbs_test*n_out+1)*sizeof(float));
+    cudaMallocManaged(&targ_test, (tbs_test*n_out+1)*sizeof(float));// again, the last pot is reserved for holding the calculated loss for the batch.
 
     // read in testing data
     begin = std::chrono::steady_clock::now();
@@ -109,12 +110,21 @@ int main(){
     std::cout << "Data (Validation) reading time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end-begin).count())/1000000.0f << std::endl;
 
     int bs_test = TEST_BATCH_SIZE;
-
+    int num_batch_test = tbs_test/bs_test;
     begin = std::chrono::steady_clock::now();
-    validate_gpu(seq,inp_test,targ_test,bs_test,n_in,n_out);
+    int correct=0;
+    float testloss=0.0f;
+     for(int batch_idx=0;batch_idx<num_batch_test;batch_idx++){
+            validate_gpu(seq,inp_test,targ_test,bs_test,n_in,n_out,batch_idx,testloss,correct);
+            std::cout << "Testing batch:"<< batch_idx << "| [finished size/testing size] : ["<< (batch_idx+1)*bs_test<<"/"<<tbs_test<< "]"<< std::endl;
+     }
+    std::cout << "Test Loss: " <<testloss/tbs_test<< std::endl;
     end = std::chrono::steady_clock::now();
     std::cout << "Validation time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end-begin).count())/1000000.0f << std::endl;
-*/
+
+    /*-------------------------Clean up---------------------------*/
+    cudaFree(inp_test);
+    cudaFree(targ_test);
     cudaFree(inp);
     cudaFree(targ);
     cudaDeviceReset();

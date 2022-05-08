@@ -41,6 +41,13 @@ void sequential_free(std::vector<Module*> layers){
 
 }
 
+void sequential_update_bs(std::vector<Module*> layers,int bs){
+    for (int i=0; i<layers.size(); i++){
+        Module *layer = layers[i];
+        layer->update_batchsize(bs);
+    }
+}
+
 Sequential_GPU::Sequential_GPU(std::vector<Module*> _layers){
     layers = _layers;
 }
@@ -59,4 +66,8 @@ void Sequential_GPU::free(){
 
   sequential_free(layers);
 
+}
+
+void Sequential_GPU::update_batchsize(int _bs){
+  sequential_update_bs(layers,_bs);
 }
