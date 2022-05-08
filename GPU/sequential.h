@@ -14,6 +14,7 @@ class Sequential_GPU: public Module{
         Sequential_GPU(std::vector<Module*> _layers);
         void forward(float *inp, float *out);
         void update();
+        void free();
 };
 
 

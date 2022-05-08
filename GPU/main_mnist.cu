@@ -7,10 +7,12 @@
 #include "validate.h"
 #include "../data/read_csv.h"
 
-#define TOTAL_TRAINING_SAMPLE 800
-#define TRAIN_GBATCH_SIZE 100
+#define TOTAL_TRAINING_SAMPLE 60000
+#define TRAING_BATCH_SIZE 600
 #define NUM_OF_INPUT 784
 #define NUM_OF_OUTPUT 10
+#define NUM_OF_EPOCH 3
+#define LOG_INTERVAL 20//print out training loss every LOG_INTERVAL number of batches
 
 #define TOTAL_TESTING_SAMPLE 1000
 #define TEST_BATCH_SIZE 1000
@@ -43,7 +45,7 @@ int main(){
   }
     std::chrono::steady_clock::time_point begin, end;
 
-    int tbs = TOTAL_TRAINING_SAMPLE, n_in = NUM_OF_INPUT, n_epochs = 10;
+    int tbs = TOTAL_TRAINING_SAMPLE, n_in = NUM_OF_INPUT, n_epochs = NUM_OF_EPOCH;
     int n_hidden_1 = 512;
     int n_hidden_2 = 512;
     int n_out = NUM_OF_OUTPUT;
@@ -54,15 +56,19 @@ int main(){
     err=cudaMallocManaged(&targ, (TOTAL_TRAINING_SAMPLE*n_out+1)*sizeof(float));
     CUDAErrorCheck(err,"failed to allocate memory for target data");
 
-    // reading training data
+    /*------------------------- reading in training data------------------------*/
     begin = std::chrono::steady_clock::now();
     read_csv(inp, "../data/train_x.csv");
     read_csv(targ, "../data/train_y.csv");
     end = std::chrono::steady_clock::now();
     std::cout << "Data (Training) reading time: " << (std::chrono::duration_cast<std::chrono::microseconds>(end-begin).count())/1000000.0f << std::endl;
     
-    int bs=TRAIN_GBATCH_SIZE;
+
+
+    /*-------------- Define your Neural Network--------------------*/
+    int bs=TRAING_BATCH_SIZE;
     int num_bs=tbs/bs;
+
     Linear_GPU* lin1 = new Linear_GPU(bs, n_in, n_hidden_1);
     ReLU_GPU* relu1 = new ReLU_GPU(bs*n_hidden_1);
     //Linear_GPU* lin2 = new Linear_GPU(bs, n_hidden_1, n_hidden_2);
@@ -73,12 +79,14 @@ int main(){
     std::vector<Module*> layers = {lin1, relu1,lin3};
     Sequential_GPU seq(layers);
 
-       //Training:
+    /*----------------Training:-----------------------------------*/
+    int log_interval=min(LOG_INTERVAL,num_bs);
     begin = std::chrono::steady_clock::now();
-    for(int i = 0;i<num_bs;i++){
+    for(int epoch_idx = 0;epoch_idx<n_epochs;epoch_idx++){
                                  
-     train_gpu(seq,inp+bs*i,targ+bs*i, bs, n_in,n_out,n_epochs);                      
-                                 
+      for(int batch_idx=0;batch_idx<num_bs;batch_idx++){
+          train_gpu(seq,inp,targ,bs,n_in,n_out,batch_idx,epoch_idx,log_interval,tbs); 
+        }                                                
      }
     end = std::chrono::steady_clock::now();
                                      

@@ -93,12 +93,14 @@ void Linear_GPU::forward(float *_inp, float *_out){
 
     dim3 n_blocks(n_block_rows, n_block_cols);
     dim3 n_threads(block_size, block_size);
+ /*   
     std::cout<<"n_block_rows: "<< n_block_rows<<std::endl;
     std::cout<<"n_block_cols: "<< n_block_cols<<std::endl;
     std::cout<<"block_size: "<< block_size<<std::endl;
     std::cout<<"n_out: "<< n_out<<std::endl;
     std::cout<<"n_in: "<< n_in<<std::endl;
     std::cout<<"bs: "<< bs<<std::endl;
+*/
     linear_forward_gpu<<<n_blocks, n_threads>>>(inp, weights, bias, out, bs, n_in, n_out);
 
     cudaError_t err = cudaGetLastError();
