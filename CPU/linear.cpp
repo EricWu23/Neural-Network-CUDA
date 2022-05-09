@@ -220,3 +220,10 @@ void Linear_CPU::update(){
 
     linear_update_cpu(inp, weights, bias, out, bs, n_in, n_out, lr);
 }
+
+void Linear_CPU::update_batchsize(int new_bs){
+  if(new_bs!=bs){
+    bs=new_bs;
+    sz_out = bs*n_out;
+  }
+}

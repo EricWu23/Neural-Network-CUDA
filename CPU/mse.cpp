@@ -11,9 +11,12 @@
             err
 
 */
-void mse_forward_cpu(float *inp, float *out, int sz_out){
+void mse_forward_cpu(float *inp, float *out, int sz_out,float* const loss){
     for (int i=0; i<sz_out; i++){
-        out[sz_out] += (inp[i]-out[i])*(inp[i]-out[i])/sz_out;// Average Square error 
+        loss[0] += (inp[i]-out[i])*(inp[i]-out[i])/sz_out;// Average Square error
+        //std::cout << " pred: " << inp[i];
+        //std::cout << " label:" << out[i];
+        //if (i%10==1){printf("\n");} 
     }
 }
 
@@ -43,12 +46,17 @@ void mse_backward_cpu(float *inp, float *out, int sz_out){
     }
 }
 
+void mse_free(float* &loss){
+   delete[] loss;
+}
 /*  
     Description:
                 This is just the class constructor that initialize sz_out based on user input.
 */
 MSE_CPU::MSE_CPU(int _sz_out){
     sz_out = _sz_out;
+    loss = new float[1];
+    loss[0]=0.0f;
 }
 
 /*
@@ -84,9 +92,10 @@ void MSE_CPU::forward(float *_inp, float *_out){
  
 */
 void MSE_CPU::_forward(float *_inp, float *_out){
-    _out[sz_out] = 0.0f;// zero out due to the way we use _out[sz_out] to store average square error
-
-    mse_forward_cpu(_inp, _out, sz_out);
+    //_out[sz_out] = 0.0f;// zero out due to the way we use _out[sz_out] to store average square error
+    loss[0]=0.0f;
+    //std::cout << "size_out: " << sz_out << std::endl;
+    mse_forward_cpu(_inp, _out, sz_out,loss);
 }
 
 /*
@@ -109,4 +118,8 @@ void MSE_CPU::_forward(float *_inp, float *_out){
 */
 void MSE_CPU::backward(){
     mse_backward_cpu(inp, out, sz_out);
+}
+
+void MSE_CPU::free(){
+  mse_free(loss);
 }

@@ -31,6 +31,9 @@ void mse_backward_gpu(float *inp, float *out, int sz_out){
     }
 }
 
+void mse_free(float* &loss){
+  cudaFree(loss);
+}
 
 MSE_GPU::MSE_GPU(int _sz_out){
     model_type = other;
@@ -62,4 +65,8 @@ void MSE_GPU::backward(){
     cudaError_t err = cudaGetLastError();
     CUDAErrorCheck(err,"mse_backward_gpu launch failed");
     cudaDeviceSynchronize();
+}
+
+void MSE_GPU::free(){
+  mse_free(loss);
 }

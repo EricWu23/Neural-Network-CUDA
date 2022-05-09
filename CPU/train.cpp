@@ -18,24 +18,31 @@
 
 
 */
-void train_cpu(Sequential_CPU seq, float *inp, float *targ, int bs, int n_in, int n_epochs){
-    MSE_CPU mse(bs);
+
+void train_cpu(Sequential_CPU & seq, float *inp, float *targ, int bs, int n_in, int n_out, int batch_idx,int epoch_idx,int log_interval,int tbs){
     
+    float* inp_shift=inp+batch_idx*bs*n_in;
+    float* targ_shft=targ+batch_idx*bs*n_out;
+    int sz_out = bs*n_out;    
     int sz_inp = bs*n_in;
-    float *cp_inp = new float[sz_inp], *out;
+    float *out;
+    MSE_CPU mse(sz_out);
 
-    for (int i=0; i<n_epochs; i++){
-        set_eq(cp_inp, inp, sz_inp);
+    seq.forward(inp_shift, out);// there will be temporary memory allocated by this function.
+    mse.forward(seq.layers.back()->out, targ_shft);//dummy, needed to be called before mse.backward().
+    mse.backward();//compute gradients
+    seq.update();//update weights
 
-        seq.forward(cp_inp, out);
-        mse.forward(seq.layers.back()->out, targ);
-        
-        mse.backward();
-        seq.update();
+    /* clean up temporary memory at the end of each batch*/
+    seq.free();
+   
+   /*----------------Loss reporting----------------------*/
+    if(batch_idx%log_interval==0){
+      seq.forward(inp_shift, out);
+      mse._forward(seq.layers.back()->out, targ_shft);// compute the actual loss
+      seq.free();
+      std::cout << "Training Epoch:"<< epoch_idx << "| [finished size/traing size] : ["<< (batch_idx+1)*bs<<"/"<<tbs<< "] ("<<
+      (int)((batch_idx+1)*bs*100.0/tbs)<<"%) | Training Loss:"<< mse.loss[0] << std::endl;
     }
-    delete[] cp_inp;
-    
-    seq.forward(inp, out);
-    mse._forward(seq.layers.back()->out, targ);
-    std::cout << "The final loss is: " << targ[bs] << std::endl;
+    mse.free();
 }

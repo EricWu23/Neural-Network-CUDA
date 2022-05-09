@@ -16,6 +16,7 @@ class MSE_GPU: public Module{
         void forward(float *_inp, float *_out);
         void _forward(float *_inp, float *_out);
         void backward();
+        void free();
 };
 
 

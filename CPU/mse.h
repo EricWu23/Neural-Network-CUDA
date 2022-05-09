@@ -21,11 +21,13 @@
 class MSE_CPU: public Module{
     public:
         float *inp, *out;
+        float *loss;
         
         MSE_CPU(int _sz_out);
         void forward(float *_inp, float *_out);
         void _forward(float *_inp, float *_out);
         void backward();
+        void free();
 };
 
 

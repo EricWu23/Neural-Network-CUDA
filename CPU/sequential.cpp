@@ -44,6 +44,22 @@ void sequetial_update_cpu(std::vector<Module*> layers){
     }
 }
 
+void sequential_free(std::vector<Module*> layers){
+
+  for (int i=0; i<layers.size(); i++){
+        Module *layer = layers[i];
+        delete[] layer->out;
+    }
+
+}
+
+void sequential_update_bs(std::vector<Module*> layers,int bs){
+    for (int i=0; i<layers.size(); i++){
+        Module *layer = layers[i];
+        layer->update_batchsize(bs);
+    }
+}
+
 /*
     Description:
         Class constructor. Initialize the object public data layers from the user input
@@ -77,4 +93,12 @@ void Sequential_CPU::forward(float *inp, float *out){
 */
 void Sequential_CPU::update(){
     sequetial_update_cpu(layers);
+}
+
+void Sequential_CPU::free(){
+  sequential_free(layers);
+}
+
+void Sequential_CPU::update_batchsize(int _bs){
+  sequential_update_bs(layers,_bs);
 }

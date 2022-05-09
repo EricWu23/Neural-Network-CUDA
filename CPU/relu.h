@@ -17,9 +17,11 @@
 */
 class ReLU_CPU: public Module{
     public:
-        ReLU_CPU(int _sz_out);
+        int bs,n_in, n_out;
+        ReLU_CPU(int _bs,int _n_in);
         void forward(float *_inp, float *_out);
         void backward();
+        void update_batchsize(int new_bs);
 };
 
 

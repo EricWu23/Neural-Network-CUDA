@@ -31,6 +31,7 @@ class Linear_CPU: public Module{
         void forward(float *_inp, float *_out);
         void backward();
         void update();
+        void update_batchsize(int new_bs);
 };
 
 

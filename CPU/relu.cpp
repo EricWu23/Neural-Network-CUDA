@@ -40,8 +40,11 @@ void relu_backward_cpu(float *inp, float *out, int sz_out){
                 The constructor of Class ReLu_CPU which save user input _sz_out
 
 */
-ReLU_CPU::ReLU_CPU(int _sz_out){
-    sz_out = _sz_out;
+ReLU_CPU::ReLU_CPU(int _bs,int _n_in){
+    bs=_bs;
+    n_in = _n_in;
+    n_out = _n_in;
+    sz_out = bs*n_out;
 }
 
 /*
@@ -65,4 +68,11 @@ void ReLU_CPU::forward(float *_inp, float *_out){
 */
 void ReLU_CPU::backward(){
     relu_backward_cpu(inp, out, sz_out);
+}
+
+void ReLU_CPU::update_batchsize(int new_bs){
+  if(new_bs!=bs){
+    bs=new_bs;
+    sz_out = bs*n_out;
+  }
 }

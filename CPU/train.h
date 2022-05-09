@@ -12,7 +12,6 @@
     Caveat:
         The size of the array pointed by targ should be bsxn_out +1. The fist bsxnout elements are labels while targ[bsxnout] will contain the average sum of square error after taining.
 */
-void train_cpu(Sequential_CPU seq, float *inp, float *targ, int bs, int n_in, int n_epochs);
-
+void train_cpu(Sequential_CPU & seq, float *inp, float *targ, int bs, int n_in,int n_out, int batch_idx,int epoch_idx,int log_interval,int tbs);
 
 #endif

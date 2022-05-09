@@ -16,6 +16,8 @@ void validate_gpu(Sequential_GPU & seq, float *inp, float *targ, int bs, int n_i
     seq.forward(inp_shift,out);
   
     mse._forward(seq.layers.back()->out,targ_shft);// compute the actual loss
+    
+    std::cout << "where did i fail:"<<std::endl;
 
     /* To DO: implement a GPU CUDA kenrel to find out the index of maxmum element in every 10 outputs (one-hot encoding converts back to scalar)
 
@@ -24,5 +26,7 @@ void validate_gpu(Sequential_GPU & seq, float *inp, float *targ, int bs, int n_i
         The reason to implement max_element_index is to give us ability to count the correct prediction and compute the accuracy. 
     */
     loss=loss+mse.loss[0];
+    seq.free();
+    mse.free();
 }
   

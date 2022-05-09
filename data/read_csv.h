@@ -4,8 +4,6 @@
 
 #include <iostream>
 
-
-void read_csv(float *inp, std::string name);
-
+void read_csv(float *inp, std::string name,int totalline);
 
 #endif

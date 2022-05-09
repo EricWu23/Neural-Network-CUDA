@@ -34,11 +34,8 @@ void train_gpu(Sequential_GPU & seq, float *inp, float *targ, int bs, int n_in,i
     
     int sz_inp = bs*n_in;
     float *cp_inp, *out;
-    cudaError_t err=cudaMallocManaged(&cp_inp, sz_inp*sizeof(float));
-    CUDAErrorCheck(err,"failed to allocate memory for input copy");
-
-    set_eq(cp_inp, inp_shift, sz_inp);// create a deep copy of the inp as cp_inp
-
+  
+    cp_inp = inp_shift;
     seq.forward(cp_inp, out);// after runing lin1.inp, lin1.out,relu1.inp,relu1.out,lin2.inp, and lin2.out will contain the results from forward propogation
     mse.forward(seq.layers.back()->out, targ_shft);// dummy, store the argument passed in as mse.inp (y_hat), mse.out (targ_shft) 
 
@@ -54,5 +51,5 @@ void train_gpu(Sequential_GPU & seq, float *inp, float *targ, int bs, int n_in,i
       std::cout << "Training Epoch:"<< epoch_idx << "| [finished size/traing size] : ["<< (batch_idx+1)*bs<<"/"<<tbs<< "] ("<<
       (int)((batch_idx+1)*bs*100.0/tbs)<<"%) | Training Loss:"<< mse.loss[0] << std::endl;
     }
-    cudaFree(cp_inp);
+    mse.free();
 }
